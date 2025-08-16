@@ -19,8 +19,16 @@ class BinanceFetcher:
     
     def __init__(self, api_key: str = BINANCE_API_KEY, api_secret: str = BINANCE_API_SECRET):
         """Initialize the Binance client"""
-        self.client = Client(api_key, api_secret) if api_key and api_secret else Client()
-        logger.info("Binance fetcher initialized")
+        try:
+            if api_key and api_secret:
+                self.client = Client(api_key, api_secret)
+            else:
+                self.client = Client()
+            logger.info("Binance fetcher initialized")
+        except Exception as e:
+            logger.error(f"Error initializing Binance client: {e}")
+            # Create a dummy client that will return empty data
+            self.client = None
         
     def get_ticker_prices(self) -> Dict[str, float]:
         """
@@ -30,10 +38,16 @@ class BinanceFetcher:
             Dict[str, float]: Dictionary of symbol-price pairs
         """
         try:
+            if self.client is None:
+                logger.warning("Binance client not initialized, returning empty data")
+                return {}
             all_tickers = self.client.get_all_tickers()
             return {ticker['symbol']: float(ticker['price']) for ticker in all_tickers}
         except BinanceAPIException as e:
             logger.error(f"Error fetching ticker prices: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Unexpected error fetching ticker prices: {e}")
             return {}
             
     def get_top_crypto_prices(self, cryptos: List[str] = TOP_CRYPTOS, markets: List[str] = MARKETS) -> pd.DataFrame:
@@ -92,6 +106,9 @@ class BinanceFetcher:
             Dict: Dictionary containing 24h statistics
         """
         try:
+            if self.client is None:
+                logger.warning("Binance client not initialized, returning empty stats")
+                return {}
             stats = self.client.get_ticker(symbol=symbol)
             return {
                 'symbol': stats['symbol'],
