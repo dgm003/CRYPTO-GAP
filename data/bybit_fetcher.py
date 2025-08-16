@@ -7,7 +7,7 @@ import time
 import logging
 from typing import Dict, List, Optional
 
-from ..config.config import BYBIT_API_KEY, BYBIT_API_SECRET, TOP_CRYPTOS, MARKETS
+from config.config import BYBIT_API_KEY, BYBIT_API_SECRET, TOP_CRYPTOS, MARKETS
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
