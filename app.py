@@ -314,13 +314,9 @@ with tab4:
         binance_info = binance_fetcher.get_detailed_coin_info(selected_coin, selected_market)
         kraken_info = kraken_fetcher.get_detailed_coin_info(selected_coin, selected_market)
         
-        if binance_info and 'stats' in binance_info and binance_info['stats']:
+        if binance_info and 'stats' in binance_info:
             # Display basic stats
             binance_stats = binance_info['stats']
-        else:
-            st.error(f"Failed to fetch detailed information for {selected_coin}/{selected_market}. This might be due to API rate limits or network issues. Try refreshing the data.")
-            st.info("You can still use other tabs like 'Live Prices' and 'Arbitrage Opportunities' which may work with different data sources.")
-            st.stop()
             
             col1, col2, col3 = st.columns(3)
             
@@ -415,6 +411,8 @@ with tab4:
                     """, unsafe_allow_html=True)
                 else:
                     st.error("Failed to calculate trade simulation.")
+        else:
+            st.error(f"Failed to fetch detailed information for {selected_coin}/{selected_market}.")
 
 # Footer
 st.markdown("---")
