@@ -147,6 +147,10 @@ class BinanceFetcher:
             Dict: Dictionary containing detailed coin information
         """
         try:
+            if self.client is None:
+                logger.warning("Binance client not initialized, returning empty detailed info")
+                return {}
+                
             trading_pair = f"{symbol}{market}"
             
             # Get 24h stats
@@ -165,4 +169,7 @@ class BinanceFetcher:
             }
         except BinanceAPIException as e:
             logger.error(f"Error fetching detailed info for {symbol}: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Unexpected error fetching detailed info for {symbol}: {e}")
             return {}
