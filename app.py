@@ -158,16 +158,12 @@ st.markdown("""
 st.markdown('<div class="main-header"><img src="https://variety.com/wp-content/uploads/2021/12/Bitcoin-Cryptocurrency-Placeholder.jpg?w=1000&h=563&crop=1" class="header-image" alt="CryptoGap+ Logo">CryptoGap+</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Advanced Crypto Arbitrage & Analysis Tool</div>', unsafe_allow_html=True)
 
-# Location restriction notice
-if not binance_fetcher.client:
-    st.warning("⚠️ **Note**: Binance API is currently unavailable in your location. The app will use Kraken and Bybit data instead. Some features may have limited functionality.")
-
 # Sidebar
 st.sidebar.title("Controls & Settings")
 
 # Refresh button
 if st.sidebar.button("Refresh Data"):
-    st.rerun()
+    st.experimental_rerun()
 
 # Coin selection for detailed analysis
 st.sidebar.markdown("## Detailed Coin Analysis")
@@ -318,40 +314,29 @@ with tab4:
         binance_info = binance_fetcher.get_detailed_coin_info(selected_coin, selected_market)
         kraken_info = kraken_fetcher.get_detailed_coin_info(selected_coin, selected_market)
         
-        # Try to get data from Binance first, fallback to Kraken if Binance is unavailable
-        if binance_info and 'stats' in binance_info and binance_info['stats']:
-            # Display basic stats from Binance
-            exchange_stats = binance_info['stats']
-            exchange_name = "Binance"
-        elif kraken_info and 'stats' in kraken_info and kraken_info['stats']:
-            # Fallback to Kraken data
-            exchange_stats = kraken_info['stats']
-            exchange_name = "Kraken"
-        else:
-            st.error(f"Failed to fetch detailed information for {selected_coin}/{selected_market} from both exchanges.")
-            st.info("This might be due to API rate limits, network issues, or location restrictions. Try refreshing the data.")
-            st.info("You can still use other tabs like 'Live Prices' and 'Arbitrage Opportunities' which may work with different data sources.")
-            st.stop()
+        if binance_info and 'stats' in binance_info:
+            # Display basic stats
+            binance_stats = binance_info['stats']
             
             col1, col2, col3 = st.columns(3)
             
             with col1:
                 st.metric(
                     "Current Price", 
-                    f"${float(exchange_stats.get('last_price', 0)):.6f}", 
-                    f"{float(exchange_stats.get('price_change_percent', 0)):.2f}%"
+                    f"${float(binance_stats.get('last_price', 0)):.6f}", 
+                    f"{float(binance_stats.get('price_change_percent', 0)):.2f}%"
                 )
             
             with col2:
                 st.metric(
                     "24h High", 
-                    f"${float(exchange_stats.get('high_price', 0)):.6f}"
+                    f"${float(binance_stats.get('high_price', 0)):.6f}"
                 )
             
             with col3:
                 st.metric(
                     "24h Low", 
-                    f"${float(exchange_stats.get('low_price', 0)):.6f}"
+                    f"${float(binance_stats.get('low_price', 0)):.6f}"
                 )
             
             col4, col5, col6 = st.columns(3)
@@ -359,33 +344,33 @@ with tab4:
             with col4:
                 st.metric(
                     "24h Volume", 
-                    f"{float(exchange_stats.get('volume', 0)):.2f} {selected_coin}"
+                    f"{float(binance_stats.get('volume', 0)):.2f} {selected_coin}"
                 )
             
             with col5:
                 st.metric(
                     "24h Quote Volume", 
-                    f"${float(exchange_stats.get('quote_volume', 0)):.2f}"
+                    f"${float(binance_stats.get('quote_volume', 0)):.2f}"
                 )
             
             with col6:
                 st.metric(
                     "Trade Count", 
-                    f"{int(exchange_stats.get('count', 0))}"
+                    f"{int(binance_stats.get('count', 0))}"
                 )
             
             # Create price chart
-            if 'open_price' in exchange_stats and 'high_price' in exchange_stats and 'low_price' in exchange_stats and 'last_price' in exchange_stats:
+            if 'open_price' in binance_stats and 'high_price' in binance_stats and 'low_price' in binance_stats and 'last_price' in binance_stats:
                 fig = go.Figure(data=[go.Candlestick(
                     x=['Open', 'High', 'Low', 'Close'],
-                    open=[float(exchange_stats['open_price'])] * 4,
-                    high=[float(exchange_stats['high_price'])] * 4,
-                    low=[float(exchange_stats['low_price'])] * 4,
-                    close=[float(exchange_stats['last_price'])] * 4
+                    open=[float(binance_stats['open_price'])] * 4,
+                    high=[float(binance_stats['high_price'])] * 4,
+                    low=[float(binance_stats['low_price'])] * 4,
+                    close=[float(binance_stats['last_price'])] * 4
                 )])
                 
                 fig.update_layout(
-                    title=f"{selected_coin}/{selected_market} 24h Price Range ({exchange_name})",
+                    title=f"{selected_coin}/{selected_market} 24h Price Range",
                     xaxis_title="Price Points",
                     yaxis_title="Price",
                     height=400
@@ -396,9 +381,7 @@ with tab4:
             # LLM analysis
             st.markdown("### LLM Analysis")
             with st.spinner("Generating analysis..."):
-                # Use the available exchange info for analysis
-                exchange_info = binance_info if exchange_name == "Binance" else kraken_info
-                analysis = llm_analyzer.generate_coin_analysis(selected_coin, exchange_info)
+                analysis = llm_analyzer.generate_coin_analysis(selected_coin, binance_info)
                 st.markdown(f'<div class="card">{analysis}</div>', unsafe_allow_html=True)
             
             # Trade simulator results
@@ -428,6 +411,8 @@ with tab4:
                     """, unsafe_allow_html=True)
                 else:
                     st.error("Failed to calculate trade simulation.")
+        else:
+            st.error(f"Failed to fetch detailed information for {selected_coin}/{selected_market}.")
 
 # Footer
 st.markdown("---")
