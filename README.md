@@ -36,7 +36,7 @@ CryptoGap+ is an advanced cryptocurrency arbitrage and analysis tool that helps 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/cryptogap-plus.git
+   git clone https://github.com/dgm003/CRYPTO-GAP.git
    cd cryptogap-plus
    ```
 
@@ -68,7 +68,7 @@ CryptoGap+ is an advanced cryptocurrency arbitrage and analysis tool that helps 
    streamlit run app.py
    ```
 
-2. The application will open in your default web browser at `http://localhost:8501`
+2. The application will open in your default web browser at `http://localhost:8501`(LOCALHOST)
 
 3. Use the sidebar to:
    - Refresh data
@@ -130,9 +130,6 @@ You can modify the following settings in `config/config.py`:
 - Add more advanced technical indicators
 - Implement real-time alerts for profitable opportunities
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
